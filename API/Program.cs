@@ -1,3 +1,4 @@
+using API.Middleware;
 using Application.Activities;
 using Application.Core;
 using FluentValidation.AspNetCore;
@@ -32,6 +33,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
