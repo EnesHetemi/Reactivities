@@ -2,8 +2,10 @@ using API.Middleware;
 using API.Services;
 using Application.Activities;
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using FluentValidation.AspNetCore;
+using Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -65,7 +67,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddScoped<TokenService>();
 
+builder.Services.AddScoped<IUserAccessor, UserAccessor>();
 
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("IsActivityHost", policy =>
+     {
+         policy.Requirements.Add(new IsHostRequirement());
+     });
+});
+
+builder.Services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
