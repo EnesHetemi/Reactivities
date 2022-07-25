@@ -1,5 +1,6 @@
 using API.Middleware;
 using API.Services;
+using API.SignalR;
 using Application.Activities;
 using Application.Core;
 using Application.Interfaces;
@@ -39,7 +40,7 @@ builder.Services.AddDbContext<DataContext>(opt =>{
 
 builder.Services.AddCors(opt => {
     opt.AddPolicy("CorsPolicy", policy =>{
-        policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
+        policy.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:3000");
     });
 });
 
@@ -64,6 +65,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false,
             ValidateAudience = false
         };
+
+        opt.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddScoped<TokenService>();
@@ -82,7 +97,9 @@ builder.Services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>()
 
 builder.Services.Configure<CloudinarySettings>(_config.GetSection("Cloudinary"));
 
-builder.Services.AddScoped<IPhotoAccessor, PhotoAccessor>();  
+builder.Services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -105,5 +122,7 @@ app.UseAuthorization();
 app.UseAuthentication();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chat");
 
 app.Run();
