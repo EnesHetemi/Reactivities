@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { Grid, Loader } from 'semantic-ui-react';
 import { PagingParams } from '../../../app/models/pagination';
 import { useStore } from '../../../app/stores/store';
-import ActivityList from './ActivitiesList';
+import ActivityList from './ActivityList';
 import ActivityFilters from './ActivityFilters';
 import ActivityListItemPlaceholder from './ActivityListItemPlaceholder';
 
