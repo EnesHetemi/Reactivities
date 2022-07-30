@@ -117,6 +117,12 @@ app.UseRouting();
 
 app.UseCors("CorsPolicy");
 
+app.UseDefaultFiles();
+
+app.UseStaticFiles();
+
+app.MapFallbackToController("Index", "Fallback");
+
 app.UseAuthorization();
 
 app.UseAuthentication();
